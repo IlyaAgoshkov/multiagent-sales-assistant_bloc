@@ -11,6 +11,7 @@ class AppealCreateRequest(BaseModel):
     source_channel: Optional[str] = Field(None, description="Канал обращения")
     appeal_text: str = Field(..., description="Текст обращения")
     manager_id: int = Field(1, description="ID менеджера")
+    urgency_level: int = Field(2, description="Уровень срочности: 1 (низкий) – 3 (высокий)")
 
 
 class AppealResponse(BaseModel):

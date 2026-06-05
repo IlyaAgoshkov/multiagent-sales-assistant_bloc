@@ -1,16 +1,15 @@
 """Pydantic schemas for the FastAPI layer."""
 
-from typing import Optional
-
 from pydantic import BaseModel, Field
 
 
 class AppealCreateRequest(BaseModel):
     client_name: str = Field(..., description="Имя клиента")
     contact_info: dict = Field(default_factory=dict, description="Контактные данные")
-    source_channel: Optional[str] = Field(None, description="Канал обращения")
+    source_channel: str = Field(..., description="Канал обращения (обязательный)")
     appeal_text: str = Field(..., description="Текст обращения")
     manager_id: int = Field(1, description="ID менеджера")
+    priority: str = Field("normal", description="Приоритет обращения: low | normal | high")
 
 
 class AppealResponse(BaseModel):

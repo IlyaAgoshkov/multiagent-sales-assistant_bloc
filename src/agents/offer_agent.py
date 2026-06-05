@@ -14,10 +14,10 @@
 import json
 from dataclasses import dataclass
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database.models import Appeal, CommercialOffer, KnowledgeBase
+from src.database.models import Appeal, CommercialOffer
+from src.db.knowledge_base_client import KnowledgeBaseClient
 from src.llm.llm_client import llm_client
 
 MAX_RETRIES = 2
@@ -43,15 +43,11 @@ class CommercialOfferAgent:
         if appeal is None:
             raise ValueError(f"Appeal {appeal_id} not found")
 
-        # Load price-list templates from knowledge_base
-        kb_q = select(KnowledgeBase).where(KnowledgeBase.category == "price_list").limit(5)
-        kb_res = await db.execute(kb_q)
-        price_items = kb_res.scalars().all()
-
-        template_q = select(KnowledgeBase).where(KnowledgeBase.category == "offer_template").limit(1)
-        tmpl_res = await db.execute(template_q)
-        template = tmpl_res.scalar_one_or_none()
-        template_text = template.content if template else "Стандартный шаблон КП."
+        # Load price-list and template via shared KnowledgeBaseClient (no duplicate SQL)
+        kb_client = KnowledgeBaseClient(db)
+        price_items = await kb_client.get_price_list(limit=5)
+        templates = await kb_client.get_offer_templates(limit=1)
+        template_text = templates[0].content if templates else "Стандартный шаблон КП."
 
         price_text = "\n".join(f"- {p.content}" for p in price_items) or "Прайс-лист недоступен."
 

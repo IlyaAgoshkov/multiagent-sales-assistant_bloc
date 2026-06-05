@@ -15,6 +15,7 @@ from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.agents.prompt_builder import PromptBuilder
 from src.database.models import Appeal, Client
 from src.llm.llm_client import llm_client
 
@@ -71,7 +72,8 @@ class AppealAnalysisAgent:
             clarification_message = await llm_client.ask(
                 system_prompt=(
                     "Ты — вежливый менеджер отдела продаж ремонтной компании. "
-                    "Клиент прислал непонятное обращение. Напиши короткое уточняющее сообщение (1–2 предложения)."
+                    "Клиент прислал непонятное обращение. "
+                    "Напиши короткое уточняющее сообщение (1–2 предложения)."
                 ),
                 user_prompt=f"Обращение клиента: {appeal_text}",
             )

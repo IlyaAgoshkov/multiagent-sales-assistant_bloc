@@ -24,12 +24,8 @@ class LLMClient:
 
     async def classify(self, text: str) -> dict:
         """Classify a client appeal: intent, urgency, category."""
-        system = (
-            "Ты — аналитик CRM-системы ремонтной компании. "
-            "Классифицируй обращение клиента и верни JSON с полями: "
-            "intent (string), urgency (low|medium|high), category (string), recognized (bool)."
-        )
-        raw = await self.ask(system, text)
+        from src.agents.prompt_builder import PromptBuilder
+        raw = await self.ask(PromptBuilder.appeal_analysis_system(), text)
         import json, re
         match = re.search(r"\{.*\}", raw, re.DOTALL)
         if match:

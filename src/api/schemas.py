@@ -10,6 +10,7 @@ class AppealCreateRequest(BaseModel):
     appeal_text: str = Field(..., description="Текст обращения")
     manager_id: int = Field(1, description="ID менеджера")
     priority: str = Field("normal", description="Приоритет обращения: low | normal | high")
+    urgency_level: int = Field(2, description="Уровень срочности: 1 (низкий) – 3 (высокий)")
 
 
 class AppealResponse(BaseModel):

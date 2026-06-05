@@ -15,7 +15,8 @@ from dataclasses import dataclass
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database.models import Appeal, Client, KnowledgeBase, Recommendation
+from src.database.models import Appeal, Client, Recommendation
+from src.db.knowledge_base_client import KnowledgeBaseClient
 from src.llm.llm_client import llm_client
 
 
@@ -51,10 +52,9 @@ class RecommendationAgent:
         history_res = await db.execute(history_q)
         history = history_res.scalars().all()
 
-        # 3. Query knowledge base
-        kb_q = select(KnowledgeBase).limit(10)
-        kb_res = await db.execute(kb_q)
-        kb_items = kb_res.scalars().all()
+        # 3. Query knowledge base via shared client (no duplicate SQL)
+        kb_client = KnowledgeBaseClient(db)
+        kb_items = await kb_client.get_all(limit=10)
 
         # 4. Build LLM prompt
         history_text = "\n".join(f"- {a.text[:200]}" for a in history) or "История отсутствует."
